@@ -1,0 +1,20 @@
+disableCaller: true  
+disableStacktrace: true
+development: true
+# sampling:  
+#   initial: 100  
+#   thereafter: 100  
+outputs:
+  - level: debug  
+    encoding: console
+    name: console-output
+    layout: "2006-01-02 15:04:05.000"
+    encoderConfig:
+      timeKey: time
+      levelKey: level
+      nameKey: logger
+      messageKey: msg
+      callerKey: caller
+      stacktraceKey: stacktrace
+      lineEnding: "\n"
+    outputPath: stdout
