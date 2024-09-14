@@ -1,6 +1,6 @@
 package system
 
-import "github.com/gin-web/model"
+import "github.com/zhljt/webserver-go/model"
 
 // User
 type User struct {
@@ -16,6 +16,10 @@ type User struct {
 	Phone string `json:"phone,omitempty"  gorm:"column:phone;type:varchar(20);comment:手机号"`
 	// 状态，0正常，1锁定，2删除
 	Status uint `json:"status"  gorm:"column:status;type:int unsigned not null;default:1;comment:用户状态 0锁定,1正常,2删除"`
+	// 角色ID
+	RoleID uint `json:"role_id"  gorm:"foreignKey:role_id;references:role_id;comment:角色ID"`
+
+	Roles []Role `json:"roles" gorm:"many2many:sys_user_role;"`
 	// 基础记录
 	model.RowRecord
 }

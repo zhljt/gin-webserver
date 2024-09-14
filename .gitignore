@@ -1,5 +1,4 @@
-temp/*
-.vscode/*
-webserver-go.exe
+.vscode/launch.json
 go.work
 go.work.sum
+webserver-go.exe
