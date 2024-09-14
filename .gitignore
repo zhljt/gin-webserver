@@ -1,2 +1,5 @@
 temp/*
 .vscode/*
+webserver-go.exe
+go.work
+go.work.sum
