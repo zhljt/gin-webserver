@@ -1,6 +1,6 @@
 package system
 
-import "github.com/zhljt/webserver-go/model"
+import "github.com/zhljt/gin-webserver/model"
 
 // User
 type User struct {

@@ -43,6 +43,7 @@ type BaseDB struct {
 
 }
 
+// MysqlDB 数据库配置
 type MysqlDB struct {
 	// Gorm 基本配置
 	BaseDB `json:"baseDB" yaml:"baseDB"`
@@ -56,4 +57,34 @@ func (m *MysqlDB) Dsn() string {
 
 func (m *MysqlDB) DsnOmitDatabase() string {
 	return m.User + ":" + m.Password + "@tcp(" + m.Host + ":" + m.Port + ")/" + "?charset=utf8mb4&parseTime=True&loc=Local"
+}
+
+func (m *MysqlDB) GetlogMode() string {
+	if m.EnableLog {
+		return m.LogMode
+	}
+	return "silent"
+}
+
+// SqlLiteDB 数据库配置
+type SqlLiteDB struct {
+	// Gorm 基本配置
+	BaseDB `json:"baseDB" yaml:"baseDB"`
+	// 数据库驱动
+	Driver string `json:"driver" yaml:"driver"`
+}
+
+func (s *SqlLiteDB) Dsn() string {
+	return s.Path + "?cache=shared&mode=rwc"
+}
+
+func (s *SqlLiteDB) DsnOmitDatabase() string {
+	return s.Path + "?cache=shared&mode=rwc"
+}
+
+func (s *SqlLiteDB) GetlogMode() string {
+	if s.EnableLog {
+		return s.LogMode
+	}
+	return "silent"
 }

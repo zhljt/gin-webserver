@@ -3,7 +3,7 @@ package initialize
 import (
 	"fmt"
 
-	"github.com/zhljt/webserver-go/model/system"
+	"github.com/zhljt/gin-webserver/model/system"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

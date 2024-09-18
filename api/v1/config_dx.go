@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/zhljt/webserver-go/service"
+	"github.com/zhljt/gin-webserver/service"
 )
 
 type ConfigDXApi struct{}

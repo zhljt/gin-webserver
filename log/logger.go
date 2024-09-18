@@ -4,37 +4,13 @@ import (
 	"os"
 	"time"
 
+	"github.com/zhljt/gin-webserver/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/yaml.v2"
 )
 
-type LogConfig struct {
-	// 是否开发者模式
-	Development bool `json:"development" yaml:"development"`
-	// 是否启用调用者记录
-	DisableCaller bool `json:"disableCaller" yaml:"disableCaller"`
-	// 是否启用堆栈跟踪记录
-	DisableStacktrace bool `json:"disableStacktrace" yaml:"disableStacktrace"`
-	// Sampling *zap.SamplingConfig `json:"sampling" yaml:"sampling"`
-	Outputs []LogOutput `json:"outputs" yaml:"outputs"`
-}
-
-type LogOutput struct {
-	// 定义日志级别
-	Level zap.AtomicLevel `json:"level" yaml:"level"`
-	// 定义 encoder 类型
-	Encoding string `json:"encoding" yaml:"encoding"`
-	// 定义 名称
-	Name string `json:"name" yaml:"name"`
-	// 时间日期格式
-	Layout        string                `json:"layout" yaml:"layout"`
-	EncoderConfig zapcore.EncoderConfig `json:"encoderConfig" yaml:"encoderConfig"`
-	// 文件输出路径，支持os.Stdout
-	OutputPath string `json:"outputPath" yaml:"outputPath"`
-}
-
-var LogConfigImpl = new(LogConfig)
+var LogConfigImpl = new(config.LogConfig)
 
 func InitLogger() error {
 	err := loadConfig("config/log.yaml")
@@ -87,7 +63,7 @@ func loadConfig(path string) error {
 	return nil
 }
 
-func genEncoder(output LogOutput) zapcore.Encoder {
+func genEncoder(output config.LogOutput) zapcore.Encoder {
 	// encoderConfig1 := zap.NewProductionEncoderConfig()
 	encoderConfig := output.EncoderConfig
 
@@ -101,7 +77,7 @@ func genEncoder(output LogOutput) zapcore.Encoder {
 	return zapcore.NewConsoleEncoder(encoderConfig)
 }
 
-func genCore(output LogOutput) (zapcore.Core, error) {
+func genCore(output config.LogOutput) (zapcore.Core, error) {
 	sink, _, err := zap.Open(output.OutputPath)
 	if err != nil {
 		return nil, err
@@ -134,13 +110,5 @@ func customCallerEncoder() zapcore.CallerEncoder {
 	return func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 		// enc.AppendString("[" + l.traceId + "]")
 		enc.AppendString("[" + caller.TrimmedPath() + "]")
-	}
-}
-
-func (c *LogConfig) SetLevel(name string, l zapcore.Level) {
-	for _, out := range c.Outputs {
-		if out.Name == name {
-			out.Level.SetLevel(l)
-		}
 	}
 }

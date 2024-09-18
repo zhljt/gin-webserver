@@ -3,7 +3,7 @@ package service
 import (
 	"strings"
 
-	"github.com/zhljt/webserver-go/tool"
+	"github.com/zhljt/gin-webserver/tool"
 )
 
 type DXInfo struct {

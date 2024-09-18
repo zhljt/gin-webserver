@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
-	apiv1 "github.com/zhljt/webserver-go/api/v1"
-	"github.com/zhljt/webserver-go/middleware"
+	apiv1 "github.com/zhljt/gin-webserver/api/v1"
+	"github.com/zhljt/gin-webserver/middleware"
 )
 
 func InitRouters() *gin.Engine {

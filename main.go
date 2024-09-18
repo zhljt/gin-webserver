@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/zhljt/webserver-go/log"
+	"github.com/zhljt/gin-webserver/log"
 	"go.uber.org/zap"
 
-	"github.com/zhljt/webserver-go/router"
+	"github.com/zhljt/gin-webserver/router"
 )
 
 func RunSimpleServer() {

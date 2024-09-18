@@ -1,4 +1,4 @@
-module github.com/zhljt/webserver-go
+module github.com/zhljt/gin-webserver
 
 go 1.22.2
 
