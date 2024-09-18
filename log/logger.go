@@ -1,60 +1,114 @@
-/*
- * @Author: Lin Jin Ting
- * @Date: 2024-08-15 14:31:28
- * @LastEditors: Lin Jin Ting
- * @LastEditTime: 2024-08-22 09:34:47
- * @FilePath: \gin-web\log\logger.go
- * @Description:
- *
- * Copyright (c) 2024 by ljt930@gmail.com, All Rights Reserved.
- */
 package log
 
 import (
 	"os"
 	"time"
 
+	"github.com/zhljt/gin-webserver/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/yaml.v2"
 )
 
-var Logger *zap.Logger
+var LogConfigImpl = new(config.LogConfig)
 
-func InitLogger() {
+func InitLogger() error {
+	err := loadConfig("config/log.yaml")
+	if err != nil {
+		return err
+	}
 
-	encoder := getEncoder()
+	var cores []zapcore.Core
+	var lg *zap.Logger
+	for _, out := range LogConfigImpl.Outputs {
+		core, err := genCore(out)
 
-	level := zap.DebugLevel
+		if err != nil {
+			return err
+		}
+		cores = append(cores, core)
+	}
+	core := zapcore.NewTee(cores...)
+	var opts []zap.Option
+	// opts = append(opts, zap.WrapCore(warecore))
+	if LogConfigImpl.DisableCaller {
+		opts = append(opts, zap.Development())
+	}
+	if LogConfigImpl.DisableCaller {
+		opts = append(opts, zap.AddCaller(), zap.AddCallerSkip(1))
+	}
+	if LogConfigImpl.DisableStacktrace {
+		opts = append(opts, zap.AddStacktrace(zap.ErrorLevel))
 
-	core := zapcore.NewCore(encoder, os.Stdout, level)
-	Logger = zap.New(core, zap.AddCaller()).Named("TEST").With(
-		zap.String("key1", "FunTester"),
-		zap.String("key2", "FunTester--"),
-	)
+	}
+	lg = zap.New(core, opts...)
 
-	zap.ReplaceGlobals(Logger) // 替换zap包中全局的logger实例，后续在其他包中只需使用zap.L()调用即可
-	return
+	// 替换zap包中全局的logger实例，后续在其他包中只需使用zap.L()调用即可
+	zap.ReplaceGlobals(lg)
+	return nil
 }
 
-func getEncoder() zapcore.Encoder {
-	encoderConfig := zap.NewProductionEncoderConfig()
-
-	encoderConfig.TimeKey = "time"
-
-	encoderConfig.EncodeTime = func(time time.Time, encoder zapcore.PrimitiveArrayEncoder) {
-		encoder.AppendString("[" + time.Format("2006-01-02 15:04:05.000") + "]")
+func loadConfig(path string) error {
+	// 读取 YAML 配置文件
+	yamlBytes, err := os.ReadFile(path)
+	if err != nil {
+		return err
 	}
 
-	encoderConfig.EncodeLevel = func(l zapcore.Level, encoder zapcore.PrimitiveArrayEncoder) {
+	err = yaml.Unmarshal(yamlBytes, LogConfigImpl)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func genEncoder(output config.LogOutput) zapcore.Encoder {
+	// encoderConfig1 := zap.NewProductionEncoderConfig()
+	encoderConfig := output.EncoderConfig
+
+	encoderConfig.EncodeTime = customTimeEncoder(output.Layout)
+	encoderConfig.EncodeLevel = customLevelEncoder()
+	encoderConfig.EncodeName = customNameEncoder()
+	encoderConfig.EncodeCaller = customCallerEncoder()
+	if output.Encoding == "json" {
+		return zapcore.NewJSONEncoder(encoderConfig)
+	}
+	return zapcore.NewConsoleEncoder(encoderConfig)
+}
+
+func genCore(output config.LogOutput) (zapcore.Core, error) {
+	sink, _, err := zap.Open(output.OutputPath)
+	if err != nil {
+		return nil, err
+	}
+	encoder := genEncoder(output)
+
+	return zapcore.NewCore(encoder, sink, output.Level), nil
+
+}
+
+func customTimeEncoder(layout string) zapcore.TimeEncoder {
+	return func(time time.Time, encoder zapcore.PrimitiveArrayEncoder) {
+		encoder.AppendString("[" + time.Format(layout) + "]")
+	}
+}
+
+func customLevelEncoder() zapcore.LevelEncoder {
+	return func(l zapcore.Level, encoder zapcore.PrimitiveArrayEncoder) {
 		encoder.AppendString("[" + l.CapitalString() + "]")
 	}
-	encoderConfig.EncodeName = func(name string, encoder zapcore.PrimitiveArrayEncoder) {
+}
+
+func customNameEncoder() zapcore.NameEncoder {
+	return func(name string, encoder zapcore.PrimitiveArrayEncoder) {
 		encoder.AppendString("[" + name + "]")
 	}
-	encoderConfig.EncodeCaller = func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
+}
+
+func customCallerEncoder() zapcore.CallerEncoder {
+	return func(caller zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 		// enc.AppendString("[" + l.traceId + "]")
 		enc.AppendString("[" + caller.TrimmedPath() + "]")
 	}
-
-	return zapcore.NewConsoleEncoder(encoderConfig)
 }
