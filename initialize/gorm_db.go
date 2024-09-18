@@ -59,17 +59,27 @@ func GormMysql() *gorm.DB {
 	// if m.Dbname == "" {
 	// 	return nil
 	// }
-	// mysqlConfig := mysql.Config{
-	// 	DSN:                       m.Dsn(), // DSN data source name
-	// 	SkipInitializeWithVersion: false,   // 根据版本自动配置 林鸣
-	// }
+	MaxIdleConns := 10
+	MaxOpenConns := 100
+	Engine := "InnoDB"
+	// Prefix := ""
+	// Singular := true
+
+	// dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+	dsn := "root:123456@tcp(139.198.115.192:8085)/mytest?charset=utf8mb4&parseTime=True&loc=Local"
+	mysqlConfig := mysql.Config{
+		DSN:                       dsn,   // DSN data source name
+		SkipInitializeWithVersion: false, // 根据版本自动配置 林鸣
+	}
 	// if db, err := gorm.Open(mysql.New(mysqlConfig), internal.Gorm.Config(m.Prefix, m.Singular)); err != nil {
 	// 	return nil
-	// } else {
-	// 	db.InstanceSet("gorm:table_options", "ENGINE="+m.Engine)
-	// 	sqlDB, _ := db.DB()
-	// 	sqlDB.SetMaxIdleConns(m.MaxIdleConns)
-	// 	sqlDB.SetMaxOpenConns(m.MaxOpenConns)
-	// 	return db
-	// }
+	if db, err := gorm.Open(mysql.New(mysqlConfig), &gorm.Config{}); err != nil {
+		return nil
+	} else {
+		db.InstanceSet("gorm:table_options", "ENGINE="+Engine)
+		sqlDB, _ := db.DB()
+		sqlDB.SetMaxIdleConns(MaxIdleConns)
+		sqlDB.SetMaxOpenConns(MaxOpenConns)
+		return db
+	}
 }
