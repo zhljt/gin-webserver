@@ -1,9 +1,8 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/gofrs/uuid/v5"
+	"go.uber.org/zap"
 )
 
 type UserInfo struct {
@@ -16,11 +15,12 @@ type UserInfo struct {
 type UserService struct{}
 
 func (US *UserService) Login(info *UserInfo) (userInfo UserInfo, err error) {
-	fmt.Println(info)
-	fmt.Println("getUserInfoForID&& save new userInfo")
+	userlog := zap.L().Named("test")
+	userlog.Info("user login")
+	userlog.Info("getUserInfoForID&& save new userInfo")
 
-	fmt.Println("checkpasswd")
+	userlog.Info("checkpasswd")
 
-	fmt.Println("checkpasswd")
+	userlog.Info("checkpasswd")
 	return UserInfo{}, nil
 }

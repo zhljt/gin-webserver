@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/zhljt/gin-webserver/log"
 	"go.uber.org/zap"
 
+	"github.com/zhljt/gin-webserver/initialize"
 	"github.com/zhljt/gin-webserver/router"
 )
 
@@ -21,23 +21,23 @@ func testlog() {
 	testlog.Info("test INFO")
 	testlog.Warn("test WARNING")
 	testlog.Error("test ERROR")
-	testlog.DPanic("AAIAIAIIAIAI")
-	log.LogConfigImpl.SetLevel("console-output", zap.WarnLevel)
-	testlog.Debug("test. debug --2")
-	testlog.Info("test INFO --2")
-	testlog.Warn("test WARNING --2")
-	testlog.Error("test ERROR --2")
-	testlog.DPanic("AAIAIAIIAIAI --2")
+	// testlog.DPanic("AAIAIAIIAIAI")
+	// config.LogConfigImpl.SetLevel("console-output", zap.WarnLevel)
+	// testlog.Debug("test. debug --2")
+	// testlog.Info("test INFO --2")
+	// testlog.Warn("test WARNING --2")
+	// testlog.Error("test ERROR --2")
+	// testlog.DPanic("AAIAIAIIAIAI --2")
 }
 
 func main() {
-	err := log.InitLogger()
+	err := initialize.InitLogger()
 	if err != nil {
 		fmt.Print(err.Error())
 		return
 	}
 	// initialize.InitDB()
-	// testlog()
+	testlog()
 	RunSimpleServer()
 
 }

@@ -1,3 +1,13 @@
+/*
+ * @Author: Lin Jin Ting
+ * @Email: ljt930@gmail.com
+ * @Date: 2024-09-18 12:57:14
+ * @Last Modified by: linjinting@gs
+ * @Last Modified time: 2024-09-19 17:13:49
+ * @FilePath: \gin-web\middleware\log.go
+ * @Description:
+ * Copyright (c) 2024 by ljt930@gmail.com, All Rights Reserved.
+ */
 package middleware
 
 import (
@@ -21,7 +31,7 @@ func GinLogger(logger *zap.Logger) gin.HandlerFunc {
 		query := c.Request.URL.RawQuery
 		c.Next()
 
-		cost := time.Since(start)
+		cost := time.Since(start).String()
 		logger.Info(path,
 			zap.Int("status", c.Writer.Status()),
 			zap.String("method", c.Request.Method),
@@ -30,7 +40,7 @@ func GinLogger(logger *zap.Logger) gin.HandlerFunc {
 			zap.String("ip", c.ClientIP()),
 			zap.String("user-agent", c.Request.UserAgent()),
 			zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
-			zap.Duration("cost", cost),
+			zap.String("cost", cost),
 		)
 	}
 }

@@ -1,3 +1,13 @@
+/*
+ * @Author: Lin Jin Ting
+ * @Email: ljt930@gmail.com
+ * @Date: 2024-09-19 08:54:10
+ * @Last Modified by: linjinting@gs
+ * @Last Modified time: 2024-09-19 17:02:57
+ * @FilePath: \gin-web\router\index.go
+ * @Description:
+ * Copyright (c) 2024 by ljt930@gmail.com, All Rights Reserved.
+ */
 package router
 
 import (

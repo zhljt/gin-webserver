@@ -1,9 +1,14 @@
 package config
 
 import (
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/yaml.v2"
 )
+
+var LogConfigImpl = new(LogConfig)
 
 type LogConfig struct {
 	// 是否开发者模式
@@ -49,31 +54,18 @@ func (lc *LogConfig) GetLevel(name string) zapcore.Level {
 	return zapcore.InfoLevel
 }
 
-func (lc *LogConfig) Init() {
-	for _, out := range lc.Outputs {
-		out.Level.SetLevel(out.Level.Level())
-		if out.Encoding == "json" {
-			out.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-		}
-		if out.OutputPath == "os.Stdout" {
-			out.OutputPath = ""
-		}
+func init() {
+	path := "config/log.yaml"
+
+	// 读取 YAML 配置文件
+	yamlBytes, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
 	}
 
-	for _, out := range lc.Outputs {
-		sink, _, err := zap.Open(out.OutputPath)
-		if err != nil {
-			panic(err)
-		}
-		output := zap.New(sink)
-		encoder := genEncoder(output)
+	err = yaml.Unmarshal(yamlBytes, LogConfigImpl)
 
-		return zapcore.NewCore(encoder, sink, out.Level), nil
-
-		if err != nil {
-			return err
-		}
-		cores = append(cores, core)
+	if err != nil {
+		panic(err)
 	}
-
 }
