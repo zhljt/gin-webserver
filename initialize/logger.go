@@ -14,17 +14,18 @@ import (
 	"time"
 
 	"github.com/zhljt/gin-webserver/config"
+	"github.com/zhljt/gin-webserver/global"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 type _zapLogger struct {
-	config.LogOutput
+	*config.ZapCore
 }
 
 func InitLogger() error {
-	var lg *zap.Logger
-	lg = zap.New(getAllCores(), initOptions()...)
+	opt := initOptions()
+	lg := zap.New(getAllCores(), opt...)
 
 	// 替换zap包中全局的logger实例，后续在其他包中只需使用zap.L()调用即可
 	zap.ReplaceGlobals(lg)
@@ -33,9 +34,9 @@ func InitLogger() error {
 
 func getAllCores() zapcore.Core {
 	cores := make([]zapcore.Core, 0)
-	for _, out := range config.LogConfigImpl.Outputs {
+	for _, out := range global.SystemConfig.ZapLog.ZapCores {
 		zl := &_zapLogger{
-			LogOutput: out,
+			ZapCore: out,
 		}
 		core, err := zl.GetCore()
 		if err != nil {
@@ -43,19 +44,20 @@ func getAllCores() zapcore.Core {
 		}
 		cores = append(cores, core)
 	}
+
 	return zapcore.NewTee(cores...)
 }
 
 func initOptions() []zap.Option {
 	var opts []zap.Option
-	// opts = append(opts, zap.WrapCore(warecore))
-	if config.LogConfigImpl.DisableCaller {
+	// opts = append(opts, zap.WrapCore(core))
+	if global.SystemConfig.ZapLog.DisableCaller {
 		opts = append(opts, zap.Development())
 	}
-	if config.LogConfigImpl.DisableCaller {
+	if global.SystemConfig.ZapLog.DisableCaller {
 		opts = append(opts, zap.AddCaller(), zap.AddCallerSkip(1))
 	}
-	if config.LogConfigImpl.DisableStacktrace {
+	if global.SystemConfig.ZapLog.DisableStacktrace {
 		opts = append(opts, zap.AddStacktrace(zap.ErrorLevel))
 
 	}

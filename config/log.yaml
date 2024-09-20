@@ -4,7 +4,7 @@ development: true
 # sampling:  
 #   initial: 100  
 #   thereafter: 100  
-outputs:
+zapCores:
   - level: debug  
     encoding: console
     name: console-output

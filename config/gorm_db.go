@@ -43,6 +43,13 @@ type BaseDB struct {
 
 }
 
+type GormDB struct {
+	// mysql数据库配置
+	MysqlDB `json:"mysqlDB" yaml:"mysqlDB"`
+	// sqlLite数据库配置
+	SqlLiteDB `json:"sqlLiteDB" yaml:"sqlLiteDB"`
+}
+
 // MysqlDB 数据库配置
 type MysqlDB struct {
 	// Gorm 基本配置
