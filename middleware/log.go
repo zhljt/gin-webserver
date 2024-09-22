@@ -34,6 +34,7 @@ func GinLogger(logger *zap.Logger) gin.HandlerFunc {
 		cost := time.Since(start).String()
 		logger.Info(path,
 			zap.Int("status", c.Writer.Status()),
+			zap.String("RequestID", c.GetString("RequestID")),
 			zap.String("method", c.Request.Method),
 			zap.String("path", path),
 			zap.String("query", query),

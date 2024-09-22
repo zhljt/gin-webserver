@@ -1,4 +1,4 @@
-package model
+package common
 
 type RowRecord struct {
 	UpdatedAt   string `json:"-" gorm:"column:updated_at;type:varchar(100) not null;default:'admin';comment:跟新人"`

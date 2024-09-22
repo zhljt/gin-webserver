@@ -1,6 +1,6 @@
 package system
 
-import "github.com/zhljt/gin-webserver/model"
+import "github.com/zhljt/gin-webserver/model/common"
 
 // User
 type User struct {
@@ -21,7 +21,7 @@ type User struct {
 
 	Roles []Role `json:"roles" gorm:"many2many:sys_user_role;"`
 	// 基础记录
-	model.RowRecord
+	common.RowRecord
 }
 
 func (User) TableName() string {

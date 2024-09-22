@@ -12,6 +12,7 @@ package router
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -31,6 +32,11 @@ func InitRouters() *gin.Engine {
 		PublicGroup.GET("/health", func(c *gin.Context) {
 			c.JSON(http.StatusOK, "ok")
 		})
+		// Test
+		PublicGroup.GET("/test", func(c *gin.Context) {
+			time.Sleep(3 * time.Second)
+			c.JSON(http.StatusOK, "test")
+		})
 	}
 	UserRouters(Router)
 	ToolRouters(Router)
@@ -43,6 +49,8 @@ func UserRouters(r *gin.Engine) {
 	UserGroup := r.Group("user")
 	{
 		UserGroup.POST("/login", apiv1.APIGroupPtr.UserApi.Login)
+		UserGroup.POST("/register", apiv1.APIGroupPtr.UserApi.Register)
+		UserGroup.POST("/logout", apiv1.APIGroupPtr.UserApi.Logout)
 	}
 
 }

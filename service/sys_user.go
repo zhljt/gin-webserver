@@ -1,26 +1,89 @@
 package service
 
 import (
-	"github.com/gofrs/uuid/v5"
+	"fmt"
+	"math/rand"
+
+	"github.com/zhljt/gin-webserver/model/system"
 	"go.uber.org/zap"
 )
 
-type UserInfo struct {
-	UUID     uuid.UUID `json:"uuid" gorm:"index;comment:用户UUID"`      // 用户UUID
-	Account  string    `json:"account" gorm:"index;comment:用户登录名"`    // 用户登录名
-	Password string    `json:"-"  gorm:"comment:用户登录密码"`              // 用户登录密码
-	Name     string    `json:"Name" gorm:"default:系统用户;comment:用户名称"` // 用户名称
-	RoleID   string    `json:"roleID" gorm:"default:1;coment:角色ID"`   // 角色ID
+type UserService interface {
+	Login(info system.User) (userInfo system.User, err error)
+	Register(info system.User) (userInfo system.User, err error)
+	ChangePassword(id uint, opassword string, npassword string) (err error)
+	ResetPassword(ids []uint) (err error)
+	// GetUserInfo(id uint) (userInfo system.User, err error)
 }
-type UserService struct{}
 
-func (US *UserService) Login(info *UserInfo) (userInfo UserInfo, err error) {
-	userlog := zap.L().Named("test")
-	userlog.Info("user login")
-	userlog.Info("getUserInfoForID&& save new userInfo")
+func NewUserService() UserService {
+	return &UserServiceImpl{}
+}
 
-	userlog.Info("checkpasswd")
+type UserServiceImpl struct{}
 
-	userlog.Info("checkpasswd")
-	return UserInfo{}, nil
+func (US *UserServiceImpl) Login(info system.User) (userInfo system.User, err error) {
+	userlog := zap.L().Named("system.user")
+	userlog.Info(fmt.Sprintf("user login: %v", info))
+	// 查询用户是否已经登陆 判断是否使用缓存查询
+	// 验证用户名和密码
+	// 数据库返回用户信息
+	// 变更用登陆状态
+
+	if MockLogin() {
+		userlog.Info("login success")
+		return system.User{}, nil
+	}
+	userlog.Info("login failed")
+	return system.User{}, fmt.Errorf("login failed")
+}
+
+func (US *UserServiceImpl) Register(info system.User) (userInfo system.User, err error) {
+	userlog := zap.L().Named("system.user")
+	userlog.Info(fmt.Sprintf("user register: %v", info))
+	// 验证用户名是否重复
+	// 数据库插入用户信息
+	if MockRegister() {
+		userlog.Info("register success")
+		return system.User{}, nil
+	}
+	userlog.Info("register failed")
+	return system.User{}, fmt.Errorf("register failed")
+}
+
+func (US *UserServiceImpl) ChangePassword(id uint, opassword string, npassword string) (err error) {
+	userlog := zap.L().Named("system.user")
+	userlog.Info(fmt.Sprintf("user change password: id=%d, old password=%s, new password=%s", id, opassword, npassword))
+	// 查询用户信息
+	// 验证旧密码是否正确
+	// 数据库更新密码
+	userlog.Info("change password success")
+	return nil
+
+}
+
+func (US *UserServiceImpl) ResetPassword(ids []uint) (err error) {
+	userlog := zap.L().Named("system.user")
+	userlog.Info(fmt.Sprintf("user reset password: ids=%v", ids))
+	// 查询用户信息
+	// 数据库更新密码
+
+	userlog.Info("reset password failed")
+	return fmt.Errorf("reset password failed")
+}
+
+func MockRegister() bool {
+	// 创建随机数
+	if rand.Intn(100) < 50 {
+		return true
+	}
+	return false
+}
+
+func MockLogin() bool {
+	// 创建随机数
+	if rand.Intn(100) < 70 {
+		return true
+	}
+	return false
 }
