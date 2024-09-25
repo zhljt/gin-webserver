@@ -3,10 +3,47 @@ package initialize
 import (
 	"fmt"
 
+	"github.com/zhljt/gin-webserver/global"
 	"github.com/zhljt/gin-webserver/model/system"
+	service_system "github.com/zhljt/gin-webserver/service/system"
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
+
+type olderModelSeq struct {
+	order uint
+	service_system.InitModelSeq
+}
+
+type olderModelSeqS []*olderModelSeq
+
+var (
+	olderModelSeqs olderModelSeqS
+	checkCache     map[string]*olderModelSeq
+)
+
+func RegisterInitModelSeq(order uint, i olderModelSeq) {
+	lg := global.ZapLogger
+	lg.Info("register init model seq",
+		zap.String("table_name", i.TableName()),
+		zap.Uint("order", order),
+	)
+	if olderModelSeqs == nil {
+		olderModelSeqs = make(olderModelSeqS, 10)
+	}
+
+	if checkCache == nil {
+		checkCache = make(map[string]*olderModelSeq)
+	}
+	name := i.TableName()
+	if _, ok := checkCache[name]; ok {
+		lg.DPanic("duplicate table name: " + name)
+	}
+	olderModelSeqs = append(olderModelSeqs, &olderModelSeq{order: order, InitModelSeq: i})
+
+	checkCache[name] = &olderModelSeq{order: order, InitModelSeq: i}
+}
 
 func InitDB() {
 	// dsn := "root:123456@tcp(139.198.115.192:8085)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
@@ -49,9 +86,6 @@ func InitDB() {
 	// tx := db.Raw("show databases").Scan(&databases)
 	// tx.Exec("use at500edb_v3")
 	// tx.Raw("show tables").Scan(&tables)
-
-	// fmt.Println(databases)
-	// fmt.Println(tables)
 }
 
 func GormMysql() *gorm.DB {
@@ -69,7 +103,7 @@ func GormMysql() *gorm.DB {
 	dsn := "root:123456@tcp(139.198.115.192:8085)/mytest?charset=utf8mb4&parseTime=True&loc=Local"
 	mysqlConfig := mysql.Config{
 		DSN:                       dsn,   // DSN data source name
-		SkipInitializeWithVersion: false, // 根据版本自动配置 林鸣
+		SkipInitializeWithVersion: false, // 根据版本自动配置
 	}
 	// if db, err := gorm.Open(mysql.New(mysqlConfig), internal.Gorm.Config(m.Prefix, m.Singular)); err != nil {
 	// 	return nil

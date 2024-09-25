@@ -1,6 +1,11 @@
 package system
 
-import "github.com/zhljt/gin-webserver/model/common"
+import (
+	"context"
+
+	"github.com/zhljt/gin-webserver/model/common"
+	"gorm.io/gorm"
+)
 
 // User
 type User struct {
@@ -26,6 +31,58 @@ type User struct {
 
 func (User) TableName() string {
 	return "sys_users"
+}
+
+func (User) CheckTable(ctx context.Context) bool {
+	db, ok := ctx.Value("db").(*gorm.DB)
+	if ok {
+		return db.Migrator().HasTable(User{})
+	}
+	return false
+}
+
+func (User) CreateTable(ctx context.Context) (context.Context, error) {
+	db, ok := ctx.Value("db").(*gorm.DB)
+	if ok {
+		return ctx, db.AutoMigrate(&User{})
+	}
+	return ctx, nil
+}
+
+func (User) CheckData(ctx context.Context) bool {
+	_, ok := ctx.Value("db").(*gorm.DB)
+	if ok {
+		return false
+	}
+	return false
+}
+
+func (User) InsertData(ctx context.Context) (context.Context, error) {
+	db, ok := ctx.Value("db").(*gorm.DB)
+	if !ok {
+		return ctx, nil
+	}
+	datas := []User{ // 假数据
+		{
+			ID:       1,
+			Account:  "admin",
+			Name:     "管理员", // 假数据
+			Password: "123456",
+			Phone:    "13800138000",
+			Status:   1,
+			RoleID:   1,
+		},
+		{
+			ID:       2,
+			Account:  "test",
+			Name:     "测试用户",
+			Password: "123456",
+			Phone:    "13800138001",
+			Status:   1,
+			RoleID:   2,
+		},
+	}
+	return ctx, db.Create(&datas).Error
 }
 
 // 例子

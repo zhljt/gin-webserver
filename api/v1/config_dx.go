@@ -1,9 +1,19 @@
+/*
+ * @Author: Lin Jin Ting
+ * @LastEditors: Lin Jin Ting
+ * @Email: ljt930@gmail.com
+ * @Description:
+ * @Date: 2024-09-14 22:14:10
+ * @LastEditTime: 2024-09-25 22:43:25
+ */
 package v1
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	model_comm "github.com/zhljt/gin-webserver/model/common"
+	model_modules "github.com/zhljt/gin-webserver/model/modules"
 	"github.com/zhljt/gin-webserver/service"
 )
 
@@ -32,16 +42,14 @@ func (dxapi *ConfigDXApi) Config5GDX(c *gin.Context) {
 	// 	return
 	// }
 
-	info := service.DXInfo{
-		ID:   req.ID,
-		IP:   req.IP,
-		Port: req.Port,
-	}
-
-	data, err := service.ServiceGroupPtr.DXService.GenerateConfig(info)
+	info := &model_modules.DXInfo{}
+	info.DXID = req.ID
+	info.DXIP = req.IP
+	info.DXPort = req.Port
+	data, err := service.ServiceGroupIns.DXService.GetDXInfoByConfig(info)
 	if err != nil {
-		c.JSON(http.StatusOK, map[string]string{"msg": "计算失败", "code": "400102", "body": err.Error()})
+		c.JSON(http.StatusOK, model_comm.ErrorWithCodeAndMessage(111111, "登录失败"))
 		return
 	}
-	c.JSON(http.StatusOK, map[string]string{"msg": "计算成功", "code": "0", "body": data})
+	c.JSON(http.StatusOK, model_comm.SuccessWithComplete("登录成功", data))
 }

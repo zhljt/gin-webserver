@@ -3,6 +3,7 @@ package global
 import (
 	"github.com/spf13/viper"
 	"github.com/zhljt/gin-webserver/config"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -11,6 +12,7 @@ var (
 	GormDB       *gorm.DB
 	Viper        *viper.Viper
 	SystemConfig *config.SystemConfig
+	ZapLogger    *zap.Logger
 )
 
 const (

@@ -4,13 +4,11 @@
  * @Email: ljt930@gmail.com
  * @Description:
  * @Date: 2024-04-19 16:27:26
- * @LastEditTime: 2024-09-20 23:43:06
+ * @LastEditTime: 2024-09-22 21:12:01
  */
 package main
 
 import (
-	"fmt"
-
 	"github.com/zhljt/gin-webserver/global"
 	"github.com/zhljt/gin-webserver/initialize"
 	"github.com/zhljt/gin-webserver/router"
@@ -41,11 +39,9 @@ func testlog() {
 
 func main() {
 	global.Viper = initialize.InitViper()
-	err := initialize.InitLogger()
-	if err != nil {
-		fmt.Print(err.Error())
-		return
-	}
+
+	// 初始化日志
+	initialize.InitLogger()
 
 	// initialize.InitDB()
 	testlog()

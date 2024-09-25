@@ -23,13 +23,13 @@ type _zapLogger struct {
 	*config.ZapCore
 }
 
-func InitLogger() error {
+func InitLogger() {
 	opt := initOptions()
 	lg := zap.New(getAllCores(), opt...)
-
+	global.ZapLogger = lg
 	// 替换zap包中全局的logger实例，后续在其他包中只需使用zap.L()调用即可
 	zap.ReplaceGlobals(lg)
-	return nil
+
 }
 
 func getAllCores() zapcore.Core {
