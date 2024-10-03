@@ -1,4 +1,12 @@
 /*
+ * @Author: Lin Jin Ting
+ * @LastEditors: Lin Jin Ting
+ * @Email: ljt930@gmail.com
+ * @Description:
+ * @Date: 2024-09-16 15:43:03
+ * @LastEditTime: 2024-10-01 21:29:10
+ */
+/*
  * @Author: linjinting@gs
  * @Email: 840359545@qq.com
  * @Date: 2024-09-18 13:04:34
@@ -43,53 +51,53 @@ type BaseDB struct {
 
 }
 
-type GormDB struct {
+type GormDBConfig struct {
 	// mysql数据库配置
-	MysqlDB `json:"mysqlDB" yaml:"mysqlDB"`
+	MysqlDB MysqlDBConfig `json:"mysqlDB" yaml:"mysqlDB"`
 	// sqlLite数据库配置
-	SqlLiteDB `json:"sqlLiteDB" yaml:"sqlLiteDB"`
+	SqlLiteDB SqlLiteDBConfig `json:"sqlLiteDB" yaml:"sqlLiteDB"`
 }
 
-// MysqlDB 数据库配置
-type MysqlDB struct {
+// MysqlDBConfig 数据库配置
+type MysqlDBConfig struct {
 	// Gorm 基本配置
-	BaseDB `json:"baseDB" yaml:"baseDB"`
+	BaseDB `json:"baseDB" yaml:",inline"  mapstructure:",squash"`
 	// 数据库驱动
 	Driver string `json:"driver" yaml:"driver"`
 }
 
-func (m *MysqlDB) Dsn() string {
+func (m *MysqlDBConfig) Dsn() string {
 	return m.User + ":" + m.Password + "@tcp(" + m.Host + ":" + m.Port + ")/" + m.Database + "?charset=utf8mb4&parseTime=True&loc=Local"
 }
 
-func (m *MysqlDB) DsnOmitDatabase() string {
+func (m *MysqlDBConfig) DsnOmitDatabase() string {
 	return m.User + ":" + m.Password + "@tcp(" + m.Host + ":" + m.Port + ")/" + "?charset=utf8mb4&parseTime=True&loc=Local"
 }
 
-func (m *MysqlDB) GetlogMode() string {
+func (m *MysqlDBConfig) GetlogMode() string {
 	if m.EnableLog {
 		return m.LogMode
 	}
 	return "silent"
 }
 
-// SqlLiteDB 数据库配置
-type SqlLiteDB struct {
+// SqlLiteDBConfig 数据库配置
+type SqlLiteDBConfig struct {
 	// Gorm 基本配置
-	BaseDB `json:"baseDB" yaml:"baseDB"`
+	BaseDB `json:"baseDB" yaml:"baseDB,inline" mapstructure:",squash"`
 	// 数据库驱动
 	Driver string `json:"driver" yaml:"driver"`
 }
 
-func (s *SqlLiteDB) Dsn() string {
+func (s *SqlLiteDBConfig) Dsn() string {
 	return s.Path + "?cache=shared&mode=rwc"
 }
 
-func (s *SqlLiteDB) DsnOmitDatabase() string {
+func (s *SqlLiteDBConfig) DsnOmitDatabase() string {
 	return s.Path + "?cache=shared&mode=rwc"
 }
 
-func (s *SqlLiteDB) GetlogMode() string {
+func (s *SqlLiteDBConfig) GetlogMode() string {
 	if s.EnableLog {
 		return s.LogMode
 	}

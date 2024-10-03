@@ -7,12 +7,20 @@ import (
 	"gorm.io/gorm"
 )
 
+type ContextKey string
+
 var (
 	// Global variable to store the configuration
-	GormDB       *gorm.DB
-	Viper        *viper.Viper
-	SystemConfig *config.SystemConfig
-	ZapLogger    *zap.Logger
+	G_GormDB       *gorm.DB
+	G_Viper        *viper.Viper
+	G_SystemConfig *config.SystemConfig
+	G_ZapLogger    *zap.Logger
+)
+
+const (
+	DB_OBJ_KEY    ContextKey = "db"
+	DB_CONFIG_KEY ContextKey = "db_config"
+	LOG_KEY       ContextKey = "log"
 )
 
 const (
@@ -25,6 +33,7 @@ const (
 	DB_ERROR         = 1002000 // 数据库错误
 	DB_CONNECT_ERROR = 1002001 // 数据库连接错误
 	DB_TIMEOUT_ERROR = 1002002 // 数据库操作超时
+	DB_INIT_ERROR    = 1002010 // 数据库初始化错误
 
 	CACHE_ERROR         = 1003000 // 缓存错误
 	CACHE_CONNECT_ERROR = 1003001 // 缓存连接错误

@@ -26,7 +26,7 @@ type _zapLogger struct {
 func InitLogger() {
 	opt := initOptions()
 	lg := zap.New(getAllCores(), opt...)
-	global.ZapLogger = lg
+	global.G_ZapLogger = lg
 	// 替换zap包中全局的logger实例，后续在其他包中只需使用zap.L()调用即可
 	zap.ReplaceGlobals(lg)
 
@@ -34,9 +34,9 @@ func InitLogger() {
 
 func getAllCores() zapcore.Core {
 	cores := make([]zapcore.Core, 0)
-	for _, out := range global.SystemConfig.ZapLog.ZapCores {
+	for _, out := range global.G_SystemConfig.ZapLog.ZapCores {
 		zl := &_zapLogger{
-			ZapCore: out,
+			ZapCore: &out,
 		}
 		core, err := zl.GetCore()
 		if err != nil {
@@ -51,13 +51,13 @@ func getAllCores() zapcore.Core {
 func initOptions() []zap.Option {
 	var opts []zap.Option
 	// opts = append(opts, zap.WrapCore(core))
-	if global.SystemConfig.ZapLog.DisableCaller {
+	if global.G_SystemConfig.ZapLog.DisableCaller {
 		opts = append(opts, zap.Development())
 	}
-	if global.SystemConfig.ZapLog.DisableCaller {
+	if global.G_SystemConfig.ZapLog.DisableCaller {
 		opts = append(opts, zap.AddCaller(), zap.AddCallerSkip(1))
 	}
-	if global.SystemConfig.ZapLog.DisableStacktrace {
+	if global.G_SystemConfig.ZapLog.DisableStacktrace {
 		opts = append(opts, zap.AddStacktrace(zap.ErrorLevel))
 
 	}
@@ -83,7 +83,15 @@ func (z *_zapLogger) GetEncoder() zapcore.Encoder {
 }
 
 func (z *_zapLogger) GetEncoderConfig() zapcore.EncoderConfig {
-	encoderConfig := z.EncoderConfig
+	// encoderConfig := z.EncoderConfig
+	encoderConfig := zapcore.EncoderConfig{
+		MessageKey:    z.CustomConfig.MessageKey,
+		LevelKey:      z.CustomConfig.LevelKey,
+		TimeKey:       z.CustomConfig.TimeKey,
+		CallerKey:     z.CustomConfig.CallerKey,
+		FunctionKey:   z.CustomConfig.FunctionKey,
+		StacktraceKey: z.CustomConfig.StacktraceKey,
+	}
 	encoderConfig.EncodeTime = z.customTimeEncoder(z.Layout)
 	encoderConfig.EncodeLevel = z.customLevelEncoder()
 	encoderConfig.EncodeName = z.customNameEncoder()

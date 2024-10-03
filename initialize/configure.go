@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/gin-gonic/gin"
@@ -9,6 +10,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/zhljt/gin-webserver/global"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -40,7 +42,7 @@ func InitViper() *viper.Viper {
 		panic(err)
 	}
 
-	if err := v.Unmarshal(&global.SystemConfig, viper.DecodeHook(ecodeHookFuncType())); err != nil {
+	if err := v.Unmarshal(&global.G_SystemConfig, viper.DecodeHook(ecodeHookFuncType())); err != nil {
 		panic(err)
 	}
 	return v
@@ -66,5 +68,31 @@ func ecodeHookFuncType() mapstructure.DecodeHookFunc {
 			// 对于其他类型，使用默认行为
 			return data, nil
 		}
+	}
+}
+
+func InitYaml() {
+	// TODO: implement yaml initialization
+	var path string
+	switch gin.Mode() {
+	case gin.DebugMode:
+		path = ConfigDefaultFile
+	case gin.TestMode:
+		path = ConfigTestFile
+	default:
+		path = ConfigDefaultFile
+	}
+
+	// 读取配置文件
+	data, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Printf("Error reading config file : %s", path)
+		panic(err)
+	}
+
+	// 解析配置文件
+	config := global.G_SystemConfig
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		panic(err)
 	}
 }

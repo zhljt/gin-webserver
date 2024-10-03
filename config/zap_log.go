@@ -1,3 +1,11 @@
+/*
+ * @Author: Lin Jin Ting
+ * @LastEditors: Lin Jin Ting
+ * @Email: ljt930@gmail.com
+ * @Description:
+ * @Date: 2024-09-18 22:20:34
+ * @LastEditTime: 2024-10-01 21:09:47
+ */
 package config
 
 import (
@@ -5,22 +13,8 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type atomicLevel zap.AtomicLevel
-
-func (a *atomicLevel) UnmarshalYaml(unmarshal func(interface{}) error) error {
-	var level string
-	if err := unmarshal(&level); err != nil {
-		return err
-	}
-	l, err := zap.ParseAtomicLevel(level)
-	if err != nil {
-		return err
-	}
-	*a = atomicLevel(l)
-	return nil
-}
-
-type ZapLog struct {
+// LogConfigImpl 日志配置实现
+type ZapLogConfig struct {
 	// 是否开发者模式
 	Development bool `json:"development" yaml:"development"`
 	// 是否启用调用者记录
@@ -28,7 +22,7 @@ type ZapLog struct {
 	// 是否启用堆栈跟踪记录
 	DisableStacktrace bool `json:"disableStacktrace" yaml:"disableStacktrace" mapstructure:"disableStacktrace"`
 	// Sampling *zap.SamplingConfig `json:"sampling" yaml:"sampling"`
-	ZapCores []*ZapCore `json:"zapCores" yaml:"zapCores" mapstructure:"zapCores"`
+	ZapCores []ZapCore `json:"zapCores" yaml:"zapCores" mapstructure:"zapCores"`
 }
 
 type ZapCore struct {
@@ -39,14 +33,24 @@ type ZapCore struct {
 	// 定义 名称
 	Name string `json:"name" yaml:"name" `
 	// 时间日期格式
-	Layout        string                `json:"layout" yaml:"layout"`
-	EncoderConfig zapcore.EncoderConfig `json:"encoderConfig" yaml:"encoderConfig" mapstructure:"encoderConfig"`
+	Layout       string       `json:"layout" yaml:"layout"`
+	CustomConfig CustomConfig `json:"customConfig" yaml:"customConfig"`
 	// 文件输出路径，支持os.Stdout
 	OutputPath string `json:"outputPath" yaml:"outputPath"`
 }
 
+type CustomConfig struct {
+	TimeKey       string `json:"timeKey" yaml:"timeKey"`
+	LevelKey      string `json:"levelKey" yaml:"levelKey"`
+	NameKey       string `json:"nameKey" yaml:"nameKey"`
+	CallerKey     string `json:"callerKey" yaml:"callerKey"`
+	MessageKey    string `json:"messageKey" yaml:"messageKey"`
+	FunctionKey   string `json:"functionKey" yaml:"functionKey"`
+	StacktraceKey string `json:"stacktraceKey" yaml:"stacktraceKey"`
+}
+
 // SetLevel 设置日志级别
-func (lc *ZapLog) SetLevel(name string, l zapcore.Level) {
+func (lc *ZapLogConfig) SetLevel(name string, l zapcore.Level) {
 	for _, out := range lc.ZapCores {
 		if out.Name == name {
 			out.Level.SetLevel(l)
@@ -55,7 +59,7 @@ func (lc *ZapLog) SetLevel(name string, l zapcore.Level) {
 }
 
 // GetLevel 获取日志级别
-func (lc *ZapLog) GetLevel(name string) zapcore.Level {
+func (lc *ZapLogConfig) GetLevel(name string) zapcore.Level {
 	for _, out := range lc.ZapCores {
 		if out.Name == name {
 			return out.Level.Level()

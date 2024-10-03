@@ -19,26 +19,11 @@ zapLog:
 gormDB:
     mysqlDB:
         path: ""
-        host: ""
-        port: ""
+        host: 127.0.0.1
+        port: "23306"
         user: ""
-        password: ""
+        password: "7777777777777"
         database: ""
-        maxOpenConns: 0
-        maxIdleConns: 10
-        connMaxLifeTime: 100
-        prefix: ""
-        singular: true
-        enableLog: true
-        logMode: ""
-        driver: ""
-    sqlLiteDB:
-        path: ./
-        host: ""
-        port: ""
-        user: ""
-        password: ""
-        database: mydatabase
         maxOpenConns: 0
         maxIdleConns: 0
         connMaxLifeTime: 0
@@ -46,4 +31,19 @@ gormDB:
         singular: false
         enableLog: false
         logMode: ""
-        driver: sqllite
+        driver: ""
+    sqlLiteDB:
+        path: ""
+        host: ""
+        port: ""
+        user: ""
+        password: ""
+        database: ""
+        maxOpenConns: 0
+        maxIdleConns: 0
+        connMaxLifeTime: 0
+        prefix: ""
+        singular: false
+        enableLog: false
+        logMode: ""
+        driver: ""

@@ -11,7 +11,7 @@ import (
 type UserServiceImpl struct{}
 
 func (US *UserServiceImpl) Login(info system.User) (userInfo system.User, err error) {
-	userlog := global.ZapLogger.Named("system.user")
+	userlog := global.G_ZapLogger.Named("system.user")
 	userlog.Debug(fmt.Sprintf("user login: %T", info))
 	// 查询用户是否已经登陆 判断是否使用缓存查询
 	// 验证用户名和密码
@@ -27,7 +27,7 @@ func (US *UserServiceImpl) Login(info system.User) (userInfo system.User, err er
 }
 
 func (US *UserServiceImpl) Register(info system.User) (userInfo system.User, err error) {
-	userlog := global.ZapLogger.Named("system.user")
+	userlog := global.G_ZapLogger.Named("system.user")
 	userlog.Debug(fmt.Sprintf("user register: %v", info))
 	// 验证用户名是否重复
 	// 数据库插入用户信息
@@ -40,7 +40,7 @@ func (US *UserServiceImpl) Register(info system.User) (userInfo system.User, err
 }
 
 func (US *UserServiceImpl) ChangePassword(id uint, opassword string, npassword string) (err error) {
-	userlog := global.ZapLogger.Named("system.user")
+	userlog := global.G_ZapLogger.Named("system.user")
 	userlog.Debug(fmt.Sprintf("user change password: id=%d, old password=%s, new password=%s", id, opassword, npassword))
 	// 查询用户信息
 	// 验证旧密码是否正确
@@ -51,7 +51,7 @@ func (US *UserServiceImpl) ChangePassword(id uint, opassword string, npassword s
 }
 
 func (US *UserServiceImpl) ResetPassword(ids []uint) (err error) {
-	userlog := global.ZapLogger.Named("system.user")
+	userlog := global.G_ZapLogger.Named("system.user")
 	userlog.Debug(fmt.Sprintf("user reset password: ids=%v", ids))
 	// 查询用户信息
 	// 数据库更新密码

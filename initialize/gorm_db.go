@@ -1,48 +1,72 @@
 package initialize
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/zhljt/gin-webserver/global"
 	"github.com/zhljt/gin-webserver/model/system"
-	service_system "github.com/zhljt/gin-webserver/service/system"
-	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-type olderModelSeq struct {
-	order uint
-	service_system.InitModelSeq
-}
-
-type olderModelSeqS []*olderModelSeq
-
-var (
-	olderModelSeqs olderModelSeqS
-	checkCache     map[string]*olderModelSeq
+const (
+	MigrateOrderSystem   = 10
+	MigrateOrderBusiness = 1000
 )
 
-func RegisterInitModelSeq(order uint, i olderModelSeq) {
-	lg := global.ZapLogger
-	lg.Info("register init model seq",
-		zap.String("table_name", i.TableName()),
-		zap.Uint("order", order),
-	)
-	if olderModelSeqs == nil {
-		olderModelSeqs = make(olderModelSeqS, 10)
+type MigrateModel interface {
+	TableName() string
+	Older() uint
+	// CheckTable(ctx context.Context) bool
+	MigrateTable(ctx context.Context) (context.Context, error)
+
+	// CheckData(ctx context.Context) bool
+	InsertData(ctx context.Context) (context.Context, error)
+}
+
+type _migrateModelOlder struct {
+	order uint
+	MigrateModel
+}
+type MigrateModelOlderSlice []*_migrateModelOlder
+type MigrateModelOlderSMap map[string]*_migrateModelOlder
+
+var (
+	MigrateModelOlderS MigrateModelOlderSlice
+	CheckOlderCache    MigrateModelOlderSMap
+)
+
+// Len implements sort.Interface.
+func (ms MigrateModelOlderSlice) Len() int {
+	return len(ms)
+}
+
+// Less implements sort.Interface.
+func (ms MigrateModelOlderSlice) Less(i int, j int) bool {
+	return ms[i].order < ms[j].order
+}
+
+// Swap implements sort.Interface.
+func (ms MigrateModelOlderSlice) Swap(i int, j int) {
+	ms[i], ms[j] = ms[j], ms[i]
+}
+
+func RegisterInitModelSeq(i MigrateModel) {
+	order := i.Older()
+	if MigrateModelOlderS == nil {
+		MigrateModelOlderS = make(MigrateModelOlderSlice, 0)
 	}
 
-	if checkCache == nil {
-		checkCache = make(map[string]*olderModelSeq)
+	if CheckOlderCache == nil {
+		CheckOlderCache = make(MigrateModelOlderSMap)
 	}
 	name := i.TableName()
-	if _, ok := checkCache[name]; ok {
-		lg.DPanic("duplicate table name: " + name)
+	if _, ok := CheckOlderCache[name]; ok {
+		panic(fmt.Sprintf("model %s already registered", name))
 	}
-	olderModelSeqs = append(olderModelSeqs, &olderModelSeq{order: order, InitModelSeq: i})
+	MigrateModelOlderS = append(MigrateModelOlderS, &_migrateModelOlder{order: order, MigrateModel: i})
 
-	checkCache[name] = &olderModelSeq{order: order, InitModelSeq: i}
+	CheckOlderCache[name] = &_migrateModelOlder{order: order, MigrateModel: i}
 }
 
 func InitDB() {

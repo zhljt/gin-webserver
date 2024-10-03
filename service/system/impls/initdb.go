@@ -1,25 +1,25 @@
 package impls
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
-	"github.com/zhljt/gin-webserver/global"
+	"github.com/glebarez/sqlite"
+	g "github.com/zhljt/gin-webserver/global"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
-	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
-func createDatabase(dsn string, driver string, dbName string) error {
-	lg := global.ZapLogger.Named("dbService")
-	lg.Info("Creating database...")
+func createDatabase(ctx context.Context, dsn string, driver string, dbName string) error {
+	log := ctx.Value(g.LOG_KEY).(*zap.Logger)
+	log.Info("Creating database...")
 
 	var query string
 	// 生成创建数据库SQL语句
@@ -38,18 +38,19 @@ func createDatabase(dsn string, driver string, dbName string) error {
 	defer func() {
 		if sqlDB != nil { // 判断 sqlDB 是否为 nil
 			if err := sqlDB.Close(); err != nil {
-				lg.Error("Failed to close database connection", zap.Error(err))
+				log.Error("Failed to close database connection", zap.Error(err))
 			}
 		}
 	}()
 
 	if db, err := connDB(dsn, driver, ""); err != nil {
+		log.DPanic("Failed to connect to database", zap.Error(err), zap.String("dsn", dsn), zap.String("driver", driver))
 		return err
 	} else {
 		sqlDB, _ := db.DB()
 		_, err = sqlDB.Exec(query) // 执行创建数据库的SQL语句
 		if err != nil {
-			lg.DPanic("Failed to create database", zap.Error(err))
+			log.DPanic("Failed to create database", zap.Error(err))
 			return err
 		}
 	}
@@ -65,20 +66,29 @@ func connDB(dsn string, driver string, prefix string) (*gorm.DB, error) {
 			SkipInitializeWithVersion: false, // 根据版本自动配置表结构
 		})
 		return gorm.Open(_dialector, getConfig(prefix))
-	case "postgres":
-		_dialector = postgres.New(postgres.Config{
-			DSN:                  dsn,
-			PreferSimpleProtocol: false, // 禁用复用连接
-		})
-		return gorm.Open(postgres.Open(dsn), getConfig(prefix))
-	case "sqlite3":
+	// case "postgres":
+	// 	_dialector = postgres.New(postgres.Config{
+	// 		DSN:                  dsn,
+	// 		PreferSimpleProtocol: false, // 禁用复用连接
+	// 	})
+	// 	return gorm.Open(postgres.Open(dsn), getConfig(prefix))
+	case "sqllite":
 		return gorm.Open(sqlite.Open(dsn), getConfig(prefix))
 	default:
 		_dialector = mysql.New(mysql.Config{
 			DSN:                       dsn,   // DSN data source name
 			SkipInitializeWithVersion: false, // 根据版本自动配置表结构
 		})
-		return gorm.Open(_dialector, getConfig(prefix))
+		//gorm.Open(_dialector, getConfig(prefix))
+		if db, err := gorm.Open(_dialector, getConfig(prefix)); err != nil {
+			return nil, err
+		} else {
+			sqlDB, _ := db.DB()
+			sqlDB.SetMaxIdleConns(g.G_SystemConfig.GormDB.MysqlDB.MaxIdleConns)
+			sqlDB.SetMaxOpenConns(g.G_SystemConfig.GormDB.MysqlDB.MaxOpenConns)
+			return db, nil
+		}
+
 	}
 }
 

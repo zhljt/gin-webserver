@@ -27,7 +27,7 @@ func testlog() {
 	testlog.Info("test INFO")
 	testlog.Warn("test WARNING")
 	testlog.Error("test ERROR")
-	testlog.Info("get leve" + global.SystemConfig.ZapLog.ZapCores[0].Level.String())
+	testlog.Info("get leve" + global.G_SystemConfig.ZapLog.ZapCores[0].Level.String())
 	// testlog.DPanic("AAIAIAIIAIAI")
 	// config.LogConfigImpl.SetLevel("console-output", zap.WarnLevel)
 	// testlog.Debug("test. debug --2")
@@ -38,7 +38,7 @@ func testlog() {
 }
 
 func main() {
-	global.Viper = initialize.InitViper()
+	global.G_Viper = initialize.InitViper()
 
 	// 初始化日志
 	initialize.InitLogger()

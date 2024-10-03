@@ -1,0 +1,50 @@
+gormdb:
+    mysqldb:
+        connmaxlifetime: 0
+        database: ""
+        driver: mysql
+        enablelog: false
+        host: localhost
+        logmode: ""
+        maxidleconns: 0
+        maxopenconns: 0
+        password: root
+        path: test
+        port: "3306"
+        prefix: ""
+        singular: false
+        user: root
+    sqllitedb:
+        connmaxlifetime: 0
+        database: ""
+        driver: ""
+        enablelog: false
+        host: ""
+        logmode: ""
+        maxidleconns: 0
+        maxopenconns: 0
+        password: ""
+        path: ""
+        port: ""
+        prefix: ""
+        singular: false
+        user: ""
+zaplog:
+    development: true
+    disablecaller: true
+    disablestacktrace: true
+    zapcores:
+        - level: info
+          encoding: ""
+          name: console
+          layout: ""
+          customConfig:
+            timeKey: ts
+            levelKey: level
+            nameKey: logger
+            callerKey: caller
+            messageKey: msg
+            functionKey: func
+            stacktraceKey: stacktrace
+            lineEnding: ""
+          outputPath: ""

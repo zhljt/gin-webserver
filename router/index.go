@@ -40,6 +40,7 @@ func InitRouters() *gin.Engine {
 	}
 	UserRouters(Router)
 	ToolRouters(Router)
+	InitDBRouters(Router)
 	return Router
 
 }
@@ -60,6 +61,15 @@ func ToolRouters(r *gin.Engine) {
 	ToolGroup := r.Group("dx")
 	{
 		ToolGroup.GET("/config", apiv1.APIGroupPtr.ConfigDXApi.Config5GDX)
+	}
+
+}
+
+func InitDBRouters(r *gin.Engine) {
+
+	ToolGroup := r.Group("db")
+	{
+		ToolGroup.POST("/initdb", apiv1.APIGroupPtr.InitDBApi.InitDB)
 	}
 
 }

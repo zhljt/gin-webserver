@@ -25,7 +25,7 @@ type DX5GServiceImpl struct{}
  * @return {error} *
  */
 func (dxs *DX5GServiceImpl) GetDXInfoByByteCode(info *modules.DXInfo) (*modules.DXInfo, error) {
-	lg := global.ZapLogger.Named("DX5GService")
+	lg := global.G_ZapLogger.Named("DX5GService")
 	lg.Debug("GetDXInfoByByteCode: " + info.ByteCode)
 	dx_crc32, err := tool.VerifyCRC(info.ByteCode)
 	lg.Debug("VerifyCRC: " + dx_crc32)
@@ -38,7 +38,7 @@ func (dxs *DX5GServiceImpl) GetDXInfoByByteCode(info *modules.DXInfo) (*modules.
 }
 
 func (dxs *DX5GServiceImpl) GetDXInfoByConfig(info *modules.DXInfo) (*modules.DXInfo, error) {
-	lg := global.ZapLogger.Named("DX5GService")
+	lg := global.G_ZapLogger.Named("DX5GService")
 	lg.Debug("GetDXInfoByConfig, ID: " + info.DXID + " IP: " + info.DXIP + " Port: " + info.DXPort)
 	byteCode := dxs.GetByteCode(info.DXID, info.DXIP, info.DXPort)
 	info.ByteCode = byteCode
